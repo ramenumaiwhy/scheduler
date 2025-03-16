@@ -1,36 +1,108 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dify Scheduler
 
-## Getting Started
+Difyワークフローを指定した時間に自動実行するシステムです。Vercel Cron Jobsを使用して、複数のワークフローを異なるスケジュールで実行できます。
 
-First, run the development server:
+## 機能
+
+- 設定した時間に指定したDify APIを呼び出してワークフローを実行
+- 複数のワークフローを異なるスケジュールで実行可能
+- ワークフローの実行結果はDify側で設定された連携先に自動的に投稿される
+- 実行ログを記録して障害時に確認できる
+
+## 技術スタック
+
+- Next.js: Webアプリケーションフレームワーク
+- Vercel: ホスティングとCron Jobs機能
+- Edge Runtime: 高速な実行環境
+
+## セットアップ方法
+
+### 1. リポジトリのクローン
+
+```bash
+git clone https://github.com/yourusername/dify-scheduler.git
+cd dify-scheduler
+```
+
+### 2. 依存関係のインストール
+
+```bash
+npm install
+```
+
+### 3. 環境変数の設定
+
+`.env.local`ファイルを作成し、以下の環境変数を設定します：
+
+```
+DIFY_API_KEY=your_dify_api_key_here
+DIFY_API_URL=https://api.dify.ai/v1
+```
+
+### 4. ワークフロー設定の編集
+
+`config/workflows.json`ファイルを編集して、実行するワークフローとスケジュールを設定します：
+
+```json
+{
+  "workflows": [
+    {
+      "id": "your-workflow-id-1",
+      "schedule": "0 21 * * *",
+      "name": "チバさん日報"
+    },
+    {
+      "id": "your-workflow-id-2",
+      "schedule": "0 9 * * *",
+      "name": "朝のニュース"
+    }
+  ]
+}
+```
+
+### 5. Vercel設定の編集
+
+`vercel.json`ファイルを編集して、Cron Jobsの設定を行います：
+
+```json
+{
+  "crons": [
+    {
+      "path": "/api/cron/dify-workflow?workflowId=your-workflow-id-1",
+      "schedule": "0 21 * * *"
+    },
+    {
+      "path": "/api/cron/dify-workflow?workflowId=your-workflow-id-2",
+      "schedule": "0 9 * * *"
+    }
+  ]
+}
+```
+
+### 6. ローカルでの開発
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 7. Vercelへのデプロイ
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+vercel
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## APIエンドポイント
 
-## Learn More
+- `GET /api`: APIの動作確認
+- `GET /api/workflows`: 登録されているワークフロー一覧を取得
+- `GET /api/cron/dify-workflow?workflowId=xxx`: 指定したワークフローを実行
 
-To learn more about Next.js, take a look at the following resources:
+## 注意事項
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Dify APIキーは公開しないように注意してください
+- Vercelの無料プランではCron Jobsの実行回数に制限があります
+- ワークフローIDは実際のDifyで作成したワークフローのIDに置き換えてください
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## ライセンス
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT 
