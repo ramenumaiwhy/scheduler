@@ -4,11 +4,5 @@
   "devCommand": "pnpm dev",
   "installCommand": "pnpm install",
   "framework": "nextjs",
-  "regions": ["hnd1"],
-  "crons": [
-    {
-      "path": "/api/cron",
-      "schedule": "0 14 * * *"
-    }
-  ]
+  "regions": ["hnd1"]
 } 
