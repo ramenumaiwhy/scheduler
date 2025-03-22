@@ -14,14 +14,29 @@ export function middleware(request: NextRequest) {
   // リクエストのパスを取得
   const path = request.nextUrl.pathname;
   
+  // クエリパラメータとしての認証バイパストークンを取得
+  const bypassToken = request.nextUrl.searchParams.get('x-vercel-protection-bypass');
+  
+  // レスポンスを作成
+  const response = NextResponse.next();
+  
   // APIエンドポイントへのアクセスの場合
   if (path.startsWith('/api/')) {
-    // 認証をバイパスして次のミドルウェアまたはルートハンドラに進む
-    return NextResponse.next();
+    // 環境変数からバイパスシークレットを取得
+    const bypassSecret = process.env.VERCEL_AUTOMATION_BYPASS_SECRET || '';
+    
+    // Protection Bypass for Automation用のヘッダーを追加
+    // 環境変数か、もしくはクエリパラメータで渡されたトークンを使用
+    response.headers.set('x-vercel-protection-bypass', bypassToken || bypassSecret);
+    
+    // クッキーを設定してフォローアップリクエストでも認証をバイパスできるようにする
+    response.headers.set('x-vercel-set-bypass-cookie', 'true');
+    
+    return response;
   }
   
   // その他のパスは通常の処理を続行
-  return NextResponse.next();
+  return response;
 }
 
 // マッチするパスの設定（すべてのパスに適用）
