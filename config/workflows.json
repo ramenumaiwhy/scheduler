@@ -2,13 +2,8 @@
   "workflows": [
     {
       "id": "example-workflow-id-1",
-      "schedule": "0 21 * * *",
+      "schedule": "0 22 * * *",
       "name": "チバさん日報"
-    },
-    {
-      "id": "example-workflow-id-2",
-      "schedule": "0 9 * * *",
-      "name": "朝のニュース"
     }
   ]
 } 
