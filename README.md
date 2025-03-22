@@ -11,7 +11,8 @@ Difyワークフローを指定した時間に自動実行するシステムで�
 
 ## 技術スタック
 
-- Next.js: Webアプリケーションフレームワーク
+- Next.js 15.2: 最新のWebアプリケーションフレームワーク
+- TypeScript: 型安全なJavaScriptの拡張言語
 - Vercel: ホスティングとCron Jobs機能
 - Edge Runtime: 高速な実行環境
 
@@ -27,7 +28,7 @@ cd dify-scheduler
 ### 2. 依存関係のインストール
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### 3. 環境変数の設定
@@ -37,6 +38,8 @@ npm install
 ```
 DIFY_API_KEY=your_dify_api_key_here
 DIFY_API_URL=https://api.dify.ai/v1
+# Vercelダッシュボードの「Settings > General > Protection Bypass for Automation」から取得したシークレット値
+VERCEL_AUTOMATION_BYPASS_SECRET=your_secret_here
 ```
 
 ### 4. ワークフロー設定の編集
@@ -49,7 +52,7 @@ DIFY_API_URL=https://api.dify.ai/v1
     {
       "id": "your-workflow-id-1",
       "schedule": "0 21 * * *",
-      "name": "チバさん日報"
+      "name": "夜のニュース"
     },
     {
       "id": "your-workflow-id-2",
@@ -66,6 +69,12 @@ DIFY_API_URL=https://api.dify.ai/v1
 
 ```json
 {
+  "version": 2,
+  "buildCommand": "pnpm build",
+  "devCommand": "pnpm dev",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "regions": ["hnd1"],
   "crons": [
     {
       "path": "/api/cron/dify-workflow?workflowId=your-workflow-id-1",
@@ -82,25 +91,46 @@ DIFY_API_URL=https://api.dify.ai/v1
 ### 6. ローカルでの開発
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 ### 7. Vercelへのデプロイ
 
 ```bash
-vercel
+# プレビューデプロイ
+pnpm deploy:preview
+
+# 本番デプロイ
+pnpm deploy:production
 ```
 
 ## APIエンドポイント
 
-- `GET /api`: APIの動作確認
-- `GET /api/workflows`: 登録されているワークフロー一覧を取得
-- `GET /api/cron/dify-workflow?workflowId=xxx`: 指定したワークフローを実行
+- `GET /api/health`: サーバーのヘルスチェック（動作確認）
+- `GET /api/test`: シンプルなテスト用API（認証なしでアクセス可能か確認）
+
+## 認証設定について
+
+Vercelでは保護されたAPIエンドポイントへのアクセスに認証が必要です。以下の設定を行ってください：
+
+1. Vercelダッシュボードで「Settings > Authentication」を選択
+2. 「Protection Bypass」セクションで `/api/*` パスを追加して認証をバイパス
+3. 環境変数に `VERCEL_AUTOMATION_BYPASS_SECRET` を設定
+
+## Cronジョブの制限
+
+Vercelの無料（Hobby）プランでは以下の制限があります：
+
+- 各アカウントで2つまでのCronジョブ
+- 1日1回のみの実行
+- 実行時間は正確でない場合があります（例：1時設定でも1:00〜1:59の間で実行）
+
+詳細は[Vercelのドキュメント](https://vercel.com/docs/cron-jobs/usage-and-pricing)を参照してください。
 
 ## 注意事項
 
-- Dify APIキーは公開しないように注意してください
-- Vercelの無料プランではCron Jobsの実行回数に制限があります
+- 機密情報（APIキーなど）は`.env.local`に保存し、リポジトリにコミットしないでください
+- 無効化したCronジョブも制限数にカウントされるため、完全に削除するには設定を削除して再デプロイしてください
 - ワークフローIDは実際のDifyで作成したワークフローのIDに置き換えてください
 
 ## ライセンス
